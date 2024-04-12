@@ -13,6 +13,7 @@ export async function main(ns) {
   let files = ns.ls(options.host)
   let filesToRemove = []
 
+
   if (startsWith && !endsWith) {
     filesToRemove.push(...files.filter((f) => f.startsWith(startsWith)))
   }
@@ -28,6 +29,8 @@ export async function main(ns) {
   if (!startsWith && !endsWith) {
     filesToRemove = files
   }
+
+  filesToRemove = filesToRemove.filter((f) => !f.startsWith('skogix/bin/permanent'));
 
   // Ensure only delete-able types are queued for deletion
   filesToRemove = filesToRemove.filter((f) => ['js', 'ns', 'txt'].some((ext) => f.endsWith(ext)))
