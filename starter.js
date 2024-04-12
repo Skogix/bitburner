@@ -1,9 +1,10 @@
 import {
   log
-} from 'skogix/lib/helpers.js'
+} from 'lib/helpers.js'
 import {
   scanAll, gainRootAccess
-} from 'skogix/lib/scanner.js'
+} from 'lib/scanner.js'
+
 /** @param {NS} ns **/
 export async function main(ns) {
   let test = [];
@@ -13,10 +14,4 @@ export async function main(ns) {
   log(ns, msg, false, "success");
   test.forEach((server) => gainRootAccess(ns,server));
   
-// gå till university
-  // kommer med singularity (?)
-// vid x hacking, hacka
-// jobba
-// vid var x:e level, kör en ny scan
-// tor-router
 }
