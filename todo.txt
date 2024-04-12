@@ -1,0 +1,9 @@
+- [X] scanner som rootar
+  - [ ] vid var x:e level, kör en ny scan
+- [ ] enkelt hackingscript 
+- [ ] gå till university/jobba
+- [ ] handla
+  - [ ] datorprylar
+  - [ ] tor-router
+- [ ] basic daemon
+- [ ] basic manager
