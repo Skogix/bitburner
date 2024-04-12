@@ -1,9 +1,9 @@
 import {
   log
-} from 'lib/helpers.js'
+} from 'skogix/lib/helpers.js'
 import {
   scanAll, gainRootAccess
-} from 'lib/scanner.js'
+} from 'skogix/lib/scanner.js'
 
 /** @param {NS} ns **/
 export async function main(ns) {
@@ -13,5 +13,5 @@ export async function main(ns) {
   let msg = "Scannade " + test.length + " servrar.";
   log(ns, msg, false, "success");
   test.forEach((server) => gainRootAccess(ns,server));
-  
+
 }
