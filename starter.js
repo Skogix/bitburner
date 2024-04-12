@@ -1,9 +1,9 @@
 import {
   log
-} from 'skogix/lib/helpers.js'
+} from 'lib/helpers.js'
 import {
   scanAll, gainRootAccess
-} from 'skogix/lib/scanner.js'
+} from 'lib/scanner.js'
 
 /** @param {NS} ns **/
 export async function main(ns) {
