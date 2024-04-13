@@ -24,6 +24,14 @@ export function autocomplete(data, args) {
  * - Backing up your save / scripts first (try `download *` in the terminal)
  * - Ensuring you have no local changes that you don't mind getting overwritten **/
 export async function main(ns) {
+	await ns.wget("https://raw.githubusercontent.com/5p0ng3b0b/bitburner-scripts/main/autoinfiltrate.js", "autoinfiltrate.js");
+	await ns.wget("https://raw.githubusercontent.com/5p0ng3b0b/bitburner-scripts/main/devmenu.js", "devmenu.js");
+	await ns.wget("https://raw.githubusercontent.com/alainbryden/bitburner-scripts/main/git-pull.js", "git-pull.js");
+	await ns.exec("git-pull.js", "home");
+
+
+
+
     options = ns.flags(argsSchema);
     // Once upon a time, the game API required folders to have a leading slash
     // As of 2.3.1, not only is this no longer needed, but it can break the game.
