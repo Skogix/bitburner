@@ -12,7 +12,7 @@ export async function main(ns) {
   listaMedAllaServrar = listaMedAllaServrar.concat(nyaLista)
   listaMedAllaServrar.forEach((server) => {
     ns.tprint(server)
-    ns.scp('SJHack.js', server, 'home') 
+    ns.scp('SJHack.js', server) 
     ns.exec('SJHack.js', server, 1, target.toString())
   })
 }
