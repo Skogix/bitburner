@@ -1,0 +1,10 @@
+[
+    ['max-payoff-time', '4h'],
+    ['time', null],
+    ['c', true],
+    ['continuous', true],
+    ['interval', 500],
+    ['max-spend', Number.MAX_VALUE],
+    ['toast', true],
+    ['reserve', null]
+]

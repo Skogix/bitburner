@@ -1,0 +1,1 @@
+[ ["max-payoff-time", "1h"], ["time", "1h"], ["c", true], ["continuous", true], ["interval", 5000], ["max-spend", 999999999], ["toast", true], ["reserve", null] ]

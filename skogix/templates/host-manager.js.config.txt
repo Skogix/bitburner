@@ -1,0 +1,14 @@
+[
+    ['c', false],
+    ['run-continuously', false],
+    ['interval', 10000],
+    ['min-ram-exponent', 5],
+    ['utilization-trigger', 0.80],
+    ['absolute-reserve', null],
+    ['reserve-percent', 0.9],
+    ['reserve-by-time', false],
+    ['allow-worse-purchases', false],
+    ['compare-to-home-threshold', 0.25],
+    ['compare-to-network-ram-threshold', 0.02]
+]
+
