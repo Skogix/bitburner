@@ -1,13 +1,4 @@
-import { printBreak } from "lib/helpers.js";
-
-import { log } from "lib/helpers.js";
-
-/**
- * @typedef log
- * @property {NS} ns - The namespace object
- * @property {string} message - The message
- * @returns {string} - The same message
- */
+import { log, printBreak } from "lib/helpers.js";
 
 class PC {
   /**
