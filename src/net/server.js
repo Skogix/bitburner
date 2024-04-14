@@ -1,72 +1,155 @@
-import { log, printBreak } from "lib/helpers.js";
+//import * as namespace from "script filename"; //Import all functions from script
+//import {fn1, fn2, ...} from "script filename"; //Import specific functions from script
+//import { clearLog } from "UserInterface";
 
+import { log, printBreak } from "lib/helpers.js";
 class PC {
   /**
    * Creates an instance of PC.
-   * @param {Object} [properties={}] - The properties of the PC.
-   * @param {string} [properties.hostname="Unknown"] - The host's permanent name.
-   * @param {string} [properties.organizationName="Mystery"] - The associated organization.
-   * @param {boolean} [properties.purchasedByPlayer=false] - The ownership status.
-   * @param {string} [properties.ip="10.0.0.1"] - The IP address.
-   * @param {boolean} [properties.hasAdminRights=false] - The admin rights status.
-   * @param {boolean} [properties.backdoorInstalled=false] - The backdoor installation status.
-   * @param {boolean} [properties.isConnectedTo=false] - The connection status.
-   * @param {Object} properties.ports - The ports information.
-   * @param {number} [properties.numOpenPortsRequired=0] - The required ports for NUKE.
-   * @param {number} [properties.openPortCount=0] - The count of open ports.
-   * @param {boolean} [properties.sshPortOpen=false] - The SSH port status.
-   * @param {boolean} [properties.ftpPortOpen=false] - The FTP port status.
-   * @param {boolean} [properties.smtpPortOpen=false] - The SMTP port status.
-   * @param {boolean} [properties.httpPortOpen=false] - The HTTP port status.
-   * @param {boolean} [properties.sqlPortOpen=false] - The SQL port status.
-   * @param {number} [properties.hackDifficulty=1] - The current security level.
-   * @param {number} [properties.minDifficulty=1] - The optimal security level.
-   * @param {number} [properties.moneyAvailable=0] - The available funds.
-   * @param {number} [properties.moneyMax=0] - The target funds.
-   * @param {number} [properties.serverGrowth=0] - The server growth rate.
-   * @param {number} [properties.ramUsed=0] - The consumed RAM.
-   * @param {number} [properties.maxRam=0] - The maximum RAM.
-   * @param {number} [properties.cpuCores=0] - The CPU cores count.
-   * @param {number} [properties.requiredHackingSkill=0] - The required hacking skill.
-   * @param {string} properties.protocol - The target protocol.
-   * @param {string} properties.target - The host name of the target.
-   * @param {number} properties.threads - The thread capability.
-   * @param {string} properties.type - How the host is handled.
-   * @param {string} properties.goal - The end goal for the protocol.
-   * @param {boolean} properties.idle - Indicates if it's running scripts.
+   * @param {Object} [server={}] - The properties of the PC.
+   * @param {string} [server.hostname="Unknown"] - The host's permanent name.
+   * @param {string} [server.organizationName="Mystery"] - The associated organization.
+   * @param {boolean} [server.purchasedByPlayer=false] - The ownership status.
+   * @param {string} [server.ip="10.0.0.1"] - The IP address.
+   * @param {boolean} [server.hasAdminRights=false] - The admin rights status.
+   * @param {boolean} [server.backdoorInstalled=false] - The backdoor installation status.
+   * @param {boolean} [server.isConnectedTo=false] - The connection status.
+   * @param {Object} server.ports - The ports information.
+   * @param {number} [server.numOpenPortsRequired=0] - The required ports for NUKE.
+   * @param {number} [server.openPortCount=0] - The count of open ports.
+   * @param {boolean} [server.sshPortOpen=false] - The SSH port status.
+   * @param {boolean} [server.ftpPortOpen=false] - The FTP port status.
+   * @param {boolean} [server.smtpPortOpen=false] - The SMTP port status.
+   * @param {boolean} [server.httpPortOpen=false] - The HTTP port status.
+   * @param {boolean} [server.sqlPortOpen=false] - The SQL port status.
+   * @param {number} [server.hackDifficulty=1] - The current security level.
+   * @param {number} [server.minDifficulty=1] - The optimal security level.
+   * @param {number} [server.moneyAvailable=0] - The available funds.
+   * @param {number} [server.moneyMax=0] - The target funds.
+   * @param {number} [server.serverGrowth=0] - The server growth rate.
+   * @param {number} [server.ramUsed=0] - The consumed RAM.
+   * @param {number} [server.maxRam=0] - The maximum RAM.
+   * @param {number} [server.cpuCores=0] - The CPU cores count.
+   * @param {number} [server.requiredHackingSkill=0] - The required hacking skill.
+   * @param {string} server.protocol - The target protocol.
+   * @param {string} server.target - The host name of the target.
+   * @param {number} server.threads - The thread capability.
+   * @param {string} server.type - How the host is handled.
+   * @param {string} server.goal - The end goal for the protocol.
+   * @param {boolean} server.idle - Indicates if it's running scripts.
    */
-  constructor(properties = {}) {
-    this.name = properties.hostname || "Unknown";
-    this.orgName = properties.organizationName || "Mystery";
-    this.owned = properties.purchasedByPlayer || false;
-    this.ip = properties.ip || "10.0.0.1";
-    this.admin = properties.hasAdminRights || false;
-    this.backdoor = properties.backdoorInstalled || false;
-    this.connected = properties.isConnectedTo || false;
+  constructor(server = {}) {
+    this.name = server.hostname || "Unknown";
+    this.orgName = server.organizationName || "Mystery";
+    this.owned = server.purchasedByPlayer || false;
+    this.ip = server.ip || "10.0.0.1";
+    this.admin = server.hasAdminRights || false;
+    this.backdoor = server.backdoorInstalled || false;
+    this.connected = server.isConnectedTo || false;
     this.ports = {
-      nukePorts: properties.numOpenPortsRequired || 0,
-      openPorts: properties.openPortCount || 0,
-      SSH: properties.sshPortOpen || false,
-      FTP: properties.ftpPortOpen || false,
-      SMTP: properties.smtpPortOpen || false,
-      HTTP: properties.httpPortOpen || false,
-      SQL: properties.sqlPortOpen || false,
+      nukePorts: server.numOpenPortsRequired || 0,
+      openPorts: server.openPortCount || 0,
+      SSH: server.sshPortOpen || false,
+      FTP: server.ftpPortOpen || false,
+      SMTP: server.smtpPortOpen || false,
+      HTTP: server.httpPortOpen || false,
+      SQL: server.sqlPortOpen || false,
     };
-    this.sec = properties.hackDifficulty || 1;
-    this.secGoal = properties.minDifficulty || 1;
-    this.cash = properties.moneyAvailable || 0;
-    this.cashGoal = properties.moneyMax || 0;
-    this.growth = properties.serverGrowth || 0;
-    this.ramUsed = properties.ramUsed || 0;
-    this.ramMax = properties.maxRam || 0;
-    this.cores = properties.cpuCores || 0;
-    this.hackSkill = properties.requiredHackingSkill || 0;
-    this.protocol = properties.protocol;
-    this.target = properties.target;
-    this.threads = properties.threads;
-    this.type = properties.type;
-    this.goal = properties.goal;
-    this.idle = properties.idle;
+    this.sec = server.hackDifficulty || 1;
+    this.secGoal = server.minDifficulty || 1;
+    this.cash = server.moneyAvailable || 0;
+    this.cashGoal = server.moneyMax || 0;
+    this.growth = server.serverGrowth || 0;
+    this.ramUsed = server.ramUsed || 0;
+    this.ramMax = server.maxRam || 0;
+    this.cores = server.cpuCores || 0;
+    this.hackSkill = server.requiredHackingSkill || 0;
+    this.protocol = server.protocol;
+    this.target = server.target;
+    this.threads = server.threads;
+    this.type = server.type;
+    this.goal = server.goal;
+    this.idle = server.idle;
+  }
+
+  /** @param {NS} ns - The namespace object. */
+  print(ns) {
+    let hackingDiff = this.hackSkill - ns.getHackingLevel();
+    let hackable = hackingDiff > 0 ? hackingDiff : "Hackable!";
+    log(
+      ns,
+      `${this.name.toUpperCase()}:  ${hackable}`,
+      true,
+      hackable > 0 ? "success" : "",
+    );
+  }
+  /** @param {NS} ns - The namespace object. */
+  printFull(ns) {
+    log(ns, `=== PC Info === `, true);
+    log(ns, `Hostname: ${this.name}`, true);
+    log(ns, `Organization Name: ${this.orgName}`, true);
+    log(ns, `Owned by Player: ${this.owned}`, true);
+    log(ns, `IP Address: ${this.ip}`, true);
+    log(ns, `Admin Rights: ${this.admin}`, true);
+    log(ns, `Backdoor Installed: ${this.backdoor}`, true);
+    log(ns, `Connected: ${this.connected}`, true);
+    log(ns, `Ports: ${this.ports}`, true);
+    log(ns, `Security Level: ${this.sec}`, true);
+    log(ns, `Security Goal: ${this.secGoal}`, true);
+    log(ns, `Available Funds: ${this.cash}`, true);
+    log(ns, `Target Funds: ${this.cashGoal}`, true);
+    log(ns, `Server Growth Rate: ${this.growth}`, true);
+    log(ns, `RAM Used: ${this.ramUsed}`, true);
+    log(ns, `Max RAM: ${this.ramMax}`, true);
+    log(ns, `CPU Cores: ${this.cores}`, true);
+    log(ns, `Required Hacking Skill: ${this.hackSkill}`, true);
+    log(ns, `Protocol: ${this.protocol}`, true);
+    log(ns, `Target: ${this.target}`, true);
+    log(ns, `Threads: ${this.threads}`, true);
+    log(ns, `Type: ${this.type}`, true);
+    log(ns, `Goal: ${this.goal}`, true);
+    log(ns, `Idle: ${this.idle}`, true);
+  }
+
+  /** @param {NS} ns - The namespace object.
+   *  @param {Server} server - The server to be converted
+   *  @returns {PC} pc - The newly born pc
+   */
+  static createPCfromServer(ns, server) {
+    let pc = new PC(server);
+    server.pc.name = "Skogix";
+    pc.hostname = server.hostname || "Unknown";
+    pc.orgName = server.organizationName || "Mystery";
+    pc.owned = server.purchasedByPlayer || false;
+    pc.ip = server.ip || "10.0.0.1";
+    pc.admin = server.hasAdminRights || false;
+    pc.backdoor = server.backdoorInstalled || false;
+    pc.connected = server.isConnectedTo || false;
+    pc.ports = {
+      nukePorts: server.numOpenPortsRequired || 0,
+      openPorts: server.openPortCount || 0,
+      SSH: server.sshPortOpen || false,
+      FTP: server.ftpPortOpen || false,
+      SMTP: server.smtpPortOpen || false,
+      HTTP: server.httpPortOpen || false,
+      SQL: server.sqlPortOpen || false,
+    };
+    pc.sec = server.hackDifficulty || 1;
+    pc.secGoal = server.minDifficulty || 1;
+    pc.cash = server.moneyAvailable || 0;
+    pc.cashGoal = server.moneyMax || 0;
+    pc.growth = server.serverGrowth || 0;
+    pc.ramUsed = server.ramUsed || 0;
+    pc.ramMax = server.maxRam || 0;
+    pc.cores = server.cpuCores || 0;
+    pc.hackSkill = server.requiredHackingSkill || 0;
+    pc.protocol = server.protocol;
+    pc.target = server.target;
+    pc.threads = server.threads;
+    pc.type = server.type;
+    pc.goal = server.goal;
+    pc.idle = server.idle;
+    return pc;
   }
 }
 
@@ -76,15 +159,58 @@ class PC {
  * @param {NS} ns - The namespace object.
  */
 export async function main(ns) {
-  let huhu = new PC();
-  ns.tprintf("Test");
-  ns.tprintf(huhu.toString());
+  log(ns, "START", true);
+  /** @type {Array.<PS>} scanned*/
+  var scanned = [];
+  /** @type {Array.<PS>} notScanned*/
+  var notScanned = [];
+  log(ns, scanned, true);
   let homepc = new PC(ns.getServer("home"));
-  let pcs = [homepc];
-  pcs.forEach((pc) => {
-    const hostScan = ns.scan(pc.name);
-    log(ns, hostScan, true);
-  });
+  notScanned.push(homepc);
+  while (notScanned.length > 0) {
+    log(ns, 138);
+    let currentPC = notScanned.pop();
+    let scannedHostnames = ns.scan(currentPC.hostname);
+
+    scannedHostnames.forEach((hostname) => {
+      log(ns, "scannedhostname: " + hostname, true);
+      if (
+        scanned.includes((s) => s.hostname == hostname) ||
+        hostname == undefined
+      ) {
+        // already scanned
+        log(ns, "den finns inte", true);
+      } else {
+        log(ns, 151);
+        // /** @param {Server} server */
+        log(ns, "den finns", true);
+        // log(ns, server.ip, true);
+        let server = ns.getServer(hostname);
+        let newCreatedPC = PC.createPCfromServer(server);
+        log(ns, "newpc:" + newCreatedPC, true);
+        notScanned.push(newCreatedPC);
+      }
+    });
+    // ns.getServer(currentPC.hostname);
+  }
+  //notScanned.forEach((pc) => {
+  //  const scannedPcs = ns.scan(pc.name);
+  //  scannedPcs.forEach((host) => {
+  //    if (!pcs.some((pc) => pc.name === host)) {
+  //      ns.killall(host);
+  //      let IO = new PC(ns.getServer(host));
+  //      log(ns, `${IO.name}: ${IO.orgName} @${IO.ip}`, true);
+  //      if (IO.ramMax <= 0 && IO.cash <= 0) {
+  //        ns.toast(`Dead PC: ${IO.name}`, "info", 9999);
+  //      }
+  //      pcs.push(IO);
+  //    }
+  //  });
+  //});
+  //PCAR.forEach((pc) => pc.printFull(ns));
+  //pcs.forEach((pc) => pc.print(ns));
+  //
+  log(ns, "main done", true);
 }
 /**
  * Initiates a deep network scan to discover new computers and adds them to the array of discovered computers.
@@ -100,7 +226,7 @@ export function deepScan(ns) {
       if (!PCAR.some((pc) => pc.name === host)) {
         ns.killall(host);
         let IO = new PC(ns.getServer(host));
-        ns.tprint(`${IO.name}:${IO.orgName} @ ${IO.ip}`);
+        ns.tprint(`${IO.name}: ${IO.orgName} @${IO.ip}`);
         if (IO.ramMax <= 0 && IO.cash <= 0) {
           ns.toast(`Dead PC: ${IO.name}`, "info", 9999);
         }
@@ -196,7 +322,7 @@ function getTarget(ns, PCAR) {
 //       const result = autoHack(ns, PC);
 //       if (result) {
 //         PC = updatePC(ns, PC);
-//         ns.toast(`Acquired ${PC.name} (${PC.type})`, "info", 360000);
+//         ns.toast(`Acquired ${ PC.name } (${ PC.type })`, "info", 360000);
 //       }
 //     }
 //     for (let PC of PCAR) {
@@ -204,7 +330,7 @@ function getTarget(ns, PCAR) {
 //         if (PC.type === "node" && PC.protocol === "pending") {
 //           Object.assign(PC, target);
 //         }
-//         printBreak(ns, `${PC.orgName} (${PC.type})`);
+//         printBreak(ns, `${ PC.orgName } (${ PC.type })`);
 //         await runProtocol(ns, PC);
 //       }
 //     }
@@ -227,7 +353,7 @@ function doorCheck(ns, PC) {
 }
 
 /**
- * Updates the properties of a computer object based on the current game state.
+ * Updates the server of a computer object based on the current game state.
  * @param {Object} ns - The namespace object.
  * @param {PC} IO - The computer object to update.
  * @returns {PC} - Returns the updated computer object.

@@ -1,5 +1,5 @@
 //https://github.com/bitburner-official/bitburner-src/blob/dev/src/ScriptEditor/NetscriptDefinitions.d.ts
-NetscriptDefinitions.d.ts
+NetscriptDefinitions.d.ts;
 /** All netscript definitions */
 
 /** @public {HP} HP*/
@@ -22,7 +22,7 @@ interface Skills {
 // TODO: provide same treatment to CodingContractData as for SleeveTask (actual types)
 /**
  * Coding contract data will differ depending on coding contract.
- * @public 
+ * @public
  */
 type CodingContractData = any;
 
@@ -4400,7 +4400,7 @@ interface Fragment {
   limit: number;
 }
 
-/** @public  */
+/** @public */
 interface ActiveFragment {
   id: number;
   highestCharge: number;

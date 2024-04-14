@@ -1,0 +1,69 @@
+function merge(dst, src) {
+  Object.keys(src).forEach(function(key) {
+    dst[key] = src[key];
+  });
+  return dst;
+}
+
+export async function main(ns) {
+  const doc = parent['document'];
+  const wip_container = doc.getElementById("work-in-progress-container");
+  const wip_text = doc.getElementById("work-in-progress-text");
+  const main_menu = doc.getElementById('mainmenu-container');
+
+  merge(wip_container.style, {
+    position: 'fixed', right: 0, bottom: 0,
+    maxWidth: '20%', maxHeight: '60%',
+    height: 'auto', width: 'auto',
+    overflowY: 'auto',
+    border: '2px solid #FFFFFF',
+    padding: '10px',
+  });
+
+  merge(wip_text.style, {
+    width: '100%',
+    margin: '0px',
+    fontSize: '80%',
+  });
+
+  parent.restoreUI = function(restore_active_pane, force_wip_display) {
+    main_menu.style.visibility = 'visible';
+    if (parent.active_button && restore_active_pane) {
+      parent.active_button.click();
+    }
+    if (wip_text.innerText.trim().length > 0 || force_wip_display) {
+      wip_container.style.display = 'block';
+    }
+  }
+
+  // Saves the currently active tab, and calls restoreUI to redisplay the WIP panel if needed.
+  parent.saveUI = function() {
+    parent.active_button = this;
+    parent.restoreUI(false);
+  }
+
+  ns.tprint("New UI style installed.");
+
+  if (parent.ui_restyle_installed) return;
+  parent.ui_restyle_installed = true;
+
+  // Save the current UI state when clicking on one of the main menu buttons.
+  for (let button of doc.getElementById('mainmenu').getElementsByTagName('button')) {
+    if (!button.classList.contains('mainmenu-accordion-header')) {
+      button.addEventListener('click', function() { parent.saveUI.apply(this) });
+    }
+  }
+
+  // Restore UI when clicking anywhere inside the WIP panel, or on the "cancel work" button.
+  doc.getElementById('work-in-progress-cancel-button').addEventListener(
+    'click', function() { parent.restoreUI(true, false) });
+  wip_container.addEventListener('click', parent.restoreUI);
+  // Do the same for the "create program" buttons.
+  [...doc.getElementById('create-program-list').getElementsByTagName('a')].forEach(
+    elem => elem.addEventListener('click', function() { parent.restoreUI(true, true) }));
+  // TODO: also handle the do crimes/do work buttons.
+  // Perhaps applying this to all 'a-link-button' class members would do the trick?
+  // Maybe not because they're all idempotent.
+  // Perhaps in save we can find a #generic-menupage-container with display:block
+  // and save that, rather than simulating a button click for subpages?
+}

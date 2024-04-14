@@ -1,0 +1,218 @@
+// Library functions for running Lua scripts.
+
+// How many opcodes the lua VM is allowed to execute before the watchdog timer fires.
+const WATCHDOG_TIMEOUT = 1000000
+
+// JS implementation of lua function tomoney(n, [fractional_digits]).
+// Returns n in the form "$1,234,567.89".
+function L_tomoney(L) {
+  const {luaL_checknumber,luaL_optinteger} = fengari.lauxlib;
+  const {push} = fengari.interop;
+  const n = luaL_checknumber(L, 1);
+  const fdigits = luaL_optinteger(L, 2, 0);
+  push(L, "$" + n.toLocaleString(undefined, {maximumFractionDigits:fdigits}));
+  return 1;
+}
+
+export async function luaAvailable(ns) {
+  while (typeof(fengari) === "undefined") {
+    ns.print("Lua not available yet -- sleeping until it is.");
+    await ns.sleep(5*1000);
+  }
+}
+
+// Create a new lua_State, load libraries, and run the initializer in it.
+export function newState(ns) {
+  const {to_luastring} = fengari;
+  const {lua_setglobal,lua_pushjsfunction} = fengari.lua;
+  const {luaL_newstate,luaL_requiref,luaL_dostring} = fengari.lauxlib;
+  const {luaL_openlibs} = fengari.lualib;
+  const {luaopen_js,push,tojs} = fengari.interop;
+
+  const L = luaL_newstate();
+  luaL_openlibs(L);
+  luaL_requiref(L, "js", luaopen_js, true);
+  push(L, ns);
+  lua_setglobal(L, "ns");
+  lua_pushjsfunction(L, L_tomoney);
+  lua_setglobal(L, "tomoney");
+
+  return L;
+}
+
+// Compile buf (a javascript string) and push the result onto the stack
+// as a Lua function.
+export function loadBuffer(ns, L, buf, name) {
+  const {luaL_loadbuffer} = fengari.lauxlib;
+  const {tojs} = fengari.interop;
+
+  const luastr = fengari.to_luastring(buf)
+  if (!luastr) throw "Error in string conversion loading " + name;
+  if (luaL_loadbuffer(L, luastr, luastr.length, name)) {
+    throw Error("Error loading " + name + ": " + tojs(L, -1));
+  }
+}
+
+// Load a file from disk and push it onto the stack as a Lua function.
+export function loadFile(ns, L, file) {
+  const source = ns.read(file);
+  if (!source) {
+    throw Error("Error reading source code from " + file);
+  }
+  return loadBuffer(ns, L, source, "@"+file);
+}
+
+// Call the error handler in L, if defined. Returns an error string, which the
+// caller is expected to throw.
+function handleError(L) {
+  const {lua_newthread,lua_pop,lua_getglobal,
+         lua_xmove,lua_pushthread,lua_pcall,lua_type,
+         LUA_TFUNCTION} = fengari.lua;
+  const {luaL_typename,luaL_tolstring} = fengari.lauxlib;
+  const {tojs} = fengari.interop;
+
+  const E = lua_newthread(L);
+  lua_pop(L, 1);
+
+  // Push error handler.
+  lua_getglobal(E, "aterror");
+  if (lua_type(E, -1) !== LUA_TFUNCTION) {
+    // aterror is not defined or is not a function.
+    return tojs(L, -1);
+  }
+
+  // Push the thread. We have to push it into itself first, then move it over to
+  // the error handling thread, since there's no lua_pushotherthread().
+  lua_pushthread(L);
+  lua_xmove(L, E, 1);
+
+  // Error message is still on top of the stack; move that over too.
+  lua_xmove(L, E, 1); // move the error message
+
+  // Try calling it.
+  const msg = tojs(E, -1);
+  if (lua_pcall(E, 2, 1, 0)) {
+    // Something went wrong calling the error handler.
+    let newmsg = msg + "<br>Error in Lua error handler: <br>" + tojs(E, -1);
+    console.log(newmsg);
+    return newmsg;
+  }
+  console.log("Error handling complete, returning whatever's on top of the stack: "
+             + fengari.to_jsstring(luaL_tolstring(E, -1)));
+  return fengari.to_jsstring(luaL_tolstring(E, -1));
+}
+
+// Debug hook used to implement the watchdog timer.
+// Calls atwatchdog() and behaves accordingly: throws if it returns a string,
+// yields if it returns a Promise, returns otherwise.
+function watchdogHook(L, ar) {
+  const {lua_getglobal,lua_type,LUA_TFUNCTION,lua_call,lua_newthread,lua_pop,LUA_TSTRING,
+         lua_setfield,LUA_REGISTRYINDEX,lua_xmove,LUA_TNIL,lua_yield,lua_pushthread} = fengari.lua;
+  const {luaL_optnumber,luaL_checkstack} = fengari.lauxlib;
+  const {tojs,testjs} = fengari.interop;
+
+  console.log("watchdog timer firing", L, ar);
+
+  // Call lua-side watchdog handler.
+  luaL_checkstack(L, 1);
+  const E = lua_newthread(L);
+  lua_pop(L, 1);
+
+  lua_getglobal(E, "atwatchdog");
+  if (lua_type(E, -1) === LUA_TFUNCTION) {
+    console.log("calling atwatchdog");
+    lua_pushthread(L);
+    lua_xmove(L, E, 1);  // atwatchdog L
+    lua_call(E, 1, 1);   // <<return>>
+    console.log("atwatchdog returned normally");
+    if (lua_type(E, -1) === LUA_TNIL) return 0; // continue execution
+    if (lua_type(E, -1) === LUA_TSTRING) throw Error(tojs(E, -1));
+    if (testjs(E, -1) instanceof Promise) {
+      console.log("Storing promise and yielding...");
+      lua_setfield(E, LUA_REGISTRYINDEX, "watchdog.promise");
+      return lua_yield(L, 0);
+    }
+    throw Error("atwatchdog() returned something other than string or Promise");
+  } else {
+    throw Error("atwatchdog() not defined or not a function");
+  }
+}
+
+// Call the function on top of the stack in L, passing it args.
+// If the function yields something, awaits on it and then resumes it with the
+// results of the await.
+//
+export async function callToCompletion(ns, L, args) {
+  const {lua_checkstack,lua_resume,lua_pop,LUA_OK,LUA_YIELD,lua_gettop,
+         lua_sethook,LUA_MASKCOUNT,lua_call,lua_getglobal,LUA_TFUNCTION,
+         lua_type,lua_getfield,LUA_REGISTRYINDEX,lua_pushnil,lua_setfield} = fengari.lua;
+  const {push,tojs,testjs,checkjs} = fengari.interop;
+
+  for (const arg of args) {
+      push(L, arg);
+  }
+
+  lua_sethook(L, watchdogHook, LUA_MASKCOUNT, WATCHDOG_TIMEOUT);
+  let ret = lua_resume(L, null, args.length);
+  while (ret != LUA_OK) {
+    lua_checkstack(L, 3);
+    if (ret == LUA_YIELD && lua_gettop(L) > 0) {
+      // It yielded something. We assume that this is a JS Promise.
+      let promise = checkjs(L, -1);
+      lua_pop(L, 1);
+      let result = await promise;
+      push(L, result);
+      lua_sethook(L, watchdogHook, LUA_MASKCOUNT, WATCHDOG_TIMEOUT); // Reset the watchdog.
+      ret = lua_resume(L, null, 1);
+    } else if (ret == LUA_YIELD) {
+      // It yielded nothing. Either they just called coroutine.yield() with no
+      // arguments (which they shouldn't do!) or the watchdog timer fired. In
+      // the latter case there should be a promise left in the registry...
+      lua_getfield(L, LUA_REGISTRYINDEX, "watchdog.promise");
+      await checkjs(L, -1);
+      lua_pop(L, 1);
+      lua_pushnil(L);
+      lua_setfield(L, LUA_REGISTRYINDEX, "watchdog.promise");
+      ret = lua_resume(L, null, 0);
+    } else {
+      console.log("error raised in script execution", L);
+      // It gave us an error!
+      // Before we do anything, we need to allocate some stack space, since both
+      // the error handler and testjs() need a free stack slot even if they
+      // don't keep using it.
+      if (!lua_checkstack(L, 2)) {
+        throw "Error initializing the Lua error handler.";
+      }
+
+      console.log("error type:", fengari.lauxlib.luaL_typename(L, -1));
+
+      let thrown = testjs(L, -1);
+      console.log("error object:", thrown);
+      if (thrown && thrown.hasOwnProperty('scriptRef') || thrown instanceof Error) {
+        // JS error or WorkerScript termination.
+        // We probably can't call into ns safely, so don't call aterror, just die.
+        throw thrown;
+      }
+
+      // Otherwise it's a Lua object that the error handler can at least attempt
+      // to make sense of.
+      console.log("Error executing script: " + tojs(L, -1));
+      let msg = handleError(L)
+      console.log("error handler returned:", msg)
+      msg = msg.replace(/\n/g, "<br>").replace(/<br>( +)/, "<br><pre>$1</pre>");
+      console.log("Error handler returned: " + msg);
+      // throw Error(msg);
+      if (msg[0] == "|") {
+        throw msg;
+      } else {
+        throw Error(msg);
+      }
+    }
+  }
+
+  lua_checkstack(L, 1);
+  lua_getglobal(L, "atexit");
+  if (lua_type(L, -1) === LUA_TFUNCTION) {
+    lua_call(L, 0, 0);
+  }
+}
