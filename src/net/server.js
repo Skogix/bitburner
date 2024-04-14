@@ -2,7 +2,8 @@
 //import {fn1, fn2, ...} from "script filename"; //Import specific functions from script
 //import { clearLog } from "UserInterface";
 
-import { log, printBreak } from "lib/helpers.js";
+import { log, pathJoin } from "lib/helpers.js";
+
 class PC {
   /**
    * Creates an instance of PC.
@@ -154,11 +155,57 @@ class PC {
 }
 
 /**
- * Main function to execute the hacking script.
+ * Executes a protocol on a specified computer.
  * @async
  * @param {NS} ns - The namespace object.
+ * @param {PC} PC - The computer on which the protocol will be executed.
  */
-export async function main(ns) {
+export async function runProtocol(ns, PC) {
+  // export function pathJoin(...args) {
+  //   return args
+  //     .filter((s) => !!s)
+  //     .join("/")
+  //     .replace(/\/\/+/g, "/");
+  // }
+  const filePath = pathJoin(PC.protocol, "Protocol.js");
+  ns.scp(`${filePath}`, PC.name);
+  log(ns, filePath, true);
+  ns.tprint(
+    `Targeting ${PC.target} with ${file} on ${PC.name} using ${PC.threads} threads.`,
+  );
+  ns.exec(filePath, PC.name, PC.threads, PC.target, PC.goal);
+}
+
+/**
+ * Automatically executes hacking protocols on a computer.
+ * @async
+ * @param {NS} ns - The namespace object.
+ * @param {PC} PC - The target computer.
+ * @returns {boolean} - Returns true if the hacking attempt is successful, otherwise false.
+ */
+async function autoHack(ns) {
+  // if (!PC.admin) {
+  //   try {
+  //     if (PC.ports.nukePorts >= 1) ns.brutessh(PC.name);
+  //     if (PC.ports.nukePorts >= 2) ns.ftpcrack(PC.name);
+  //     if (PC.ports.nukePorts >= 3) ns.relaysmtp(PC.name);
+  //     if (PC.ports.nukePorts >= 4) ns.httpworm(PC.name);
+  //     if (PC.ports.nukePorts >= 5) ns.sqlinject(PC.name);
+  //     ns.nuke(PC.name);
+  //   } catch (error) {
+  //     return false;
+  //   }
+  // }
+  // return true;
+}
+
+/**
+ * Initiates a deep network scan to discover new computers and adds them to the array of discovered computers.
+ * @param {Function} initServers - test
+ * @param {Object} ns - The namespace object.
+ * @returns {Array.<PC>} - Returns an array of discovered computers.
+ */
+export function initServers(ns) {
   log(ns, "START", true);
   /** @type {Array.<PS>} scanned*/
   var scanned = [];
@@ -186,38 +233,35 @@ export async function main(ns) {
         log(ns, "den finns", true);
         // log(ns, server.ip, true);
         let server = ns.getServer(hostname);
+        if (server.ramMax <= 0 && server.cash <= 0) {
+          ns.toast(`Dead PC: ${server.name}`, "info", 9999);
+        }
         let newCreatedPC = PC.createPCfromServer(server);
-        log(ns, "newpc:" + newCreatedPC, true);
+        log(ns, `${server.name}: ${server.orgName} @${server.ip}`, true);
         notScanned.push(newCreatedPC);
       }
     });
-    // ns.getServer(currentPC.hostname);
   }
-  //notScanned.forEach((pc) => {
-  //  const scannedPcs = ns.scan(pc.name);
-  //  scannedPcs.forEach((host) => {
-  //    if (!pcs.some((pc) => pc.name === host)) {
-  //      ns.killall(host);
-  //      let IO = new PC(ns.getServer(host));
-  //      log(ns, `${IO.name}: ${IO.orgName} @${IO.ip}`, true);
-  //      if (IO.ramMax <= 0 && IO.cash <= 0) {
-  //        ns.toast(`Dead PC: ${IO.name}`, "info", 9999);
-  //      }
-  //      pcs.push(IO);
-  //    }
-  //  });
-  //});
-  //PCAR.forEach((pc) => pc.printFull(ns));
-  //pcs.forEach((pc) => pc.print(ns));
-  //
   log(ns, "main done", true);
 }
+
+/**
+ * Main function to execute the hacking script.
+ * @async
+ * @param {NS} ns - The namespace object.
+ * @returns {Array.<PS>} The namespace object.
+ *
+ */
+export async function main(ns) {
+  let servers = initServers(ns);
+  return servers;
+}
+
 /**
  * Initiates a deep network scan to discover new computers and adds them to the array of discovered computers.
  * @param {Object} ns - The namespace object.
  * @returns {Array.<PC>} - Returns an array of discovered computers.
  */
-
 export function deepScan(ns) {
   let PCAR = [new PC(ns.getServer("home"))];
   for (let i = 0; i < PCAR.length; i++) {
