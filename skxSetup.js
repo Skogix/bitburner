@@ -24,9 +24,9 @@ export function autocomplete(data, args) {
  * - Backing up your save / scripts first (try `download *` in the terminal)
  * - Ensuring you have no local changes that you don't mind getting overwritten **/
 export async function main(ns) {
-	await ns.wget("https://raw.githubusercontent.com/5p0ng3b0b/bitburner-scripts/main/autoinfiltrate.js", "autoinfiltrate.js");
-	//await ns.wget("https://raw.githubusercontent.com/5p0ng3b0b/bitburner-scripts/main/devmenu.js", "devmenu.js");
-	await ns.wget("https://raw.githubusercontent.com/alainbryden/bitburner-scripts/main/git-pull.js", "git-pull.js");
+	await ns.wget("https://raw.githubusercontent.com/5p0ng3b0b/bitburner-scripts/main/autoinfiltrate.js", "exploits/infiltrate.js");
+	await ns.wget("https://raw.githubusercontent.com/5p0ng3b0b/bitburner-scripts/main/devmenu.js", "exploits/devmenu.js");
+	await ns.wget("https://raw.githubusercontent.com/alainbryden/bitburner-scripts/main/git-pull.js", "bin/git/alainbryden.js");
 	//await ns.exec("git-pull.js", "home");
 
 

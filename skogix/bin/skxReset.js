@@ -30,10 +30,10 @@ export async function main(ns) {
     filesToRemove = files
   }
 
-  filesToRemove = filesToRemove.filter((f) => !f.startsWith('skogix/bin/permanent'));
+  filesToRemove = filesToRemove.filter((f) => !f.startsWith('skx'));
 
   // Ensure only delete-able types are queued for deletion
-  filesToRemove = filesToRemove.filter((f) => ['js', 'ns', 'txt'].some((ext) => f.endsWith(ext)))
+  filesToRemove = filesToRemove.filter((f) => ['js', 'ns', 'txt', 'script'].some((ext) => f.endsWith(ext)))
 
   if (!filesToRemove.length) {
     ns.tprint(
