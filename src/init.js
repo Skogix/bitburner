@@ -1,14 +1,9 @@
 /** @param {NS} ns **/
 export async function main(ns) {
-  let run = true;
-  while (run) {
-    let servers = ns.run("net/server.js");
-    servers.forEach((server) => {
-      ns.tprint(server.name);
-      ns.scp("/src/net/server.js", server, "home");
-      ns.exec("/src/net/server.js", "home", server);
-    });
-    await ns.sleep(5000);
-  }
-  return 69420;
+  let serverManager = ns.run("src/net/serverManager.js");
+  let target = serverManager.getPC("n00dles");
+  ns.tprint("home");
+  ns.scp("/src/net/server.js", target, "home");
+  ns.exec("/src/net/server.js", "home", target);
+  await ns.sleep(5000);
 }

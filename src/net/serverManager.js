@@ -1,6 +1,3 @@
-//import * as namespace from "script filename"; //Import all functions from script
-//import {fn1, fn2, ...} from "script filename"; //Import specific functions from script
-//import { clearLog } from "UserInterface";
 import { log, pathJoin } from "lib/helpers.js";
 import { PC } from "server.js";
 
@@ -20,22 +17,128 @@ class ServerManager {
    * @param {String} [this.ip="10.0.0.1"] - The IP address.
    * @param {boolean} [this.hasAdminRights=false] - The admin rights status.
    * @param {boolean} [server.backdoorInstalled=false] - The backdoor installation status.
+   * @param {ServerManager} [server.instance - The backdoor installation status.
    */
-  constructor(init = {}) {
+  getNS() {
+    return this.ns;
+  }
+  getInstance(ns) {
+    return this.instance;
+  }
+  getServers(ns) {
+    return this.servers;
+  }
+  getServer(ns) {
+    return this.servers.find((s) => s.username == ns.argsr[0]);
+  }
+  getPC(ns) {
+    return this.servers.find((s) => s.username == ns.args[0]);
+  }
+  async getInstance(ns) {
+    if (ns.args[0] == "init") {
+      return new ServerManager();
+    } else {
+      return this.instance;
+    }
+  }
+  constructor(ns, init = {}) {
     this.type = ManagerType.Server;
     this.hostname = init.hostname || "Unknown";
+    this.ns = ns;
     this.log = ["Init"];
     this.ip = init.ip || "10.0.0.1";
+    this.PCs = [];
+    this.instance = null;
   }
-  runProtocol(ns) {
-    _runProtocol(ns.args[0], ns.args[1], ns.args[2]);
+  /**
+   * Executes a protocol on a specified computer.
+   * @async
+   * @param {NS} ns - The namespace object.
+   * @param {PC} PC - The computer on which the protocol will be executed.
+   */
+  async #runProtocol(ns, PC) {
+    let protocol = ns.args[0];
+    let target = ns.args[1];
+    let source = ns.args[2];
+    const filePath = pathJoin("scripts/", protocol);
+    ns.scp(protocol, filePath);
+    log(ns, filePath, true);
+
+    ns.tprint(
+      `Targeting ${PC.target} with ${filePath} on ${PC.name} using ${PC.threads} threads.`,
+    );
+    //ns.exec(filePath, PC.name, PC.threads, PC.target, PC.goal);
   }
-  init(ns) {
-    _initServers();
+
+  /**
+   * Automatically executes hacking protocols on a computer.
+   * @async
+   * @param {NS} ns - The namespace object.
+   * @param {PC} PC - The target computer.
+   * @returns {boolean} - Returns true if the hacking attempt is successful, otherwise false.
+   */
+  async #autoHack(ns) {
+    return "";
+  }
+
+  /**
+   * Initiates a deep network scan to discover new computers and adds them to the array of discovered computers.
+   * @param {Function} initServers - test
+   * @param {Object} ns - The namespace object.
+   * @returns {Array.<PC>} - Returns an array of discovered computers.
+   */
+  async #initServers(ns) {
+    log(ns, "START", true);
+    /** @type {Array.<PS>} scanned*/
+    var scanned = [];
+    /** @type {Array.<PS>} notScanned*/
+    var notScanned = [];
+    log(ns, scanned, true);
+    let homepc = new PC(ns.getServer("home"));
+    notScanned.push(homepc);
+    while (notScanned.length > 0) {
+      log(ns, 138);
+      let currentPC = notScanned.pop();
+      let scannedHostnames = ns.scan(currentPC.hostname);
+
+      scannedHostnames.forEach((hostname) => {
+        log(ns, "scannedhostname: " + hostname, true);
+        if (
+          scanned.includes((s) => s.hostname == hostname) ||
+          hostname == undefined
+        ) {
+          // already scanned
+          log(ns, "den finns inte", true);
+        } else {
+          log(ns, 151);
+          // /** @param {Server} server */
+          log(ns, "den finns", true);
+          // log(ns, server.ip, true);
+          let server = ns.getServer(hostname);
+          if (server.ramMax <= 0 && server.cash <= 0) {
+            ns.toast(`Dead PC: ${server.name}`, "info", 9999);
+          }
+          let newCreatedPC = PC.createPCfromServer(server);
+          log(ns, `${server.name}: ${server.orgName} @${server.ip}`, true);
+          notScanned.push(newCreatedPC);
+        }
+      });
+    }
+    ServerManager.updateServers(scanned);
+    log(ns, "Servers updated", true);
+  }
+  //static protocol = this.protocol
+  async runProtocol(ns) {
+    this.runProtocol(ns.args[0], ns.args[1], ns.args[2]);
+  }
+  _init(ns) {
+    this.#uldateServers(ns.args[0], ns.args[1], ns.args[2]);
   }
   /** @returns {ServerManager} instance */
   /** @param {ServerManager} instance */
-  static instance = ServerManager.instance;
+  #uldateServers(ns) {
+    this.servers = ns.argrs[0];
+  }
 }
 
 /**
@@ -52,84 +155,6 @@ export async function main(ns) {
   } else {
     return ServerManager.instance;
   }
-}
-
-/**
- * Executes a protocol on a specified computer.
- * @async
- * @param {NS} ns - The namespace object.
- * @param {PC} PC - The computer on which the protocol will be executed.
- */
-async function _runProtocol(ns, PC) {
-  let protocol = ns.args[0];
-  let target = ns.args[1];
-  let source = ns.args[2];
-
-  const filePath = pathJoin("scripts/", protocol);
-  ns.scp(protocol, filePath);
-  log(ns, filePath, true);
-
-  ns.tprint(
-    `Targeting ${PC.target} with ${filePath} on ${PC.name} using ${PC.threads} threads.`,
-  );
-  //ns.exec(filePath, PC.name, PC.threads, PC.target, PC.goal);
-}
-
-/**
- * Automatically executes hacking protocols on a computer.
- * @async
- * @param {NS} ns - The namespace object.
- * @param {PC} PC - The target computer.
- * @returns {boolean} - Returns true if the hacking attempt is successful, otherwise false.
- */
-async function _autoHack(ns) {
-  return "";
-}
-
-/**
- * Initiates a deep network scan to discover new computers and adds them to the array of discovered computers.
- * @param {Function} initServers - test
- * @param {Object} ns - The namespace object.
- * @returns {Array.<PC>} - Returns an array of discovered computers.
- */
-export function _initServers(ns) {
-  log(ns, "START", true);
-  /** @type {Array.<PS>} scanned*/
-  var scanned = [];
-  /** @type {Array.<PS>} notScanned*/
-  var notScanned = [];
-  log(ns, scanned, true);
-  let homepc = new PC(ns.getServer("home"));
-  notScanned.push(homepc);
-  while (notScanned.length > 0) {
-    log(ns, 138);
-    let currentPC = notScanned.pop();
-    let scannedHostnames = ns.scan(currentPC.hostname);
-
-    scannedHostnames.forEach((hostname) => {
-      log(ns, "scannedhostname: " + hostname, true);
-      if (
-        scanned.includes((s) => s.hostname == hostname) ||
-        hostname == undefined
-      ) {
-        // already scanned
-        log(ns, "den finns inte", true);
-      } else {
-        log(ns, 151);
-        // /** @param {Server} server */
-        log(ns, "den finns", true);
-        // log(ns, server.ip, true);
-        let server = ns.getServer(hostname);
-        if (server.ramMax <= 0 && server.cash <= 0) {
-          ns.toast(`Dead PC: ${server.name}`, "info", 9999);
-        }
-        let newCreatedPC = PC.createPCfromServer(server);
-        log(ns, `${server.name}: ${server.orgName} @${server.ip}`, true);
-        notScanned.push(newCreatedPC);
-      }
-    });
-  }
-  log(ns, "main done", true);
 }
 
 /****************************************/
