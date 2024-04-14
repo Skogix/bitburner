@@ -1,5 +1,4 @@
 //https://github.com/bitburner-official/bitburner-src/blob/dev/src/ScriptEditor/NetscriptDefinitions.d.ts
-NetscriptDefinitions.d.ts
 /** All netscript definitions */
 
 /** @public {HP} HP*/
@@ -22,7 +21,7 @@ interface Skills {
 // TODO: provide same treatment to CodingContractData as for SleeveTask (actual types)
 /**
  * Coding contract data will differ depending on coding contract.
- * @public 
+ * @public
  */
 type CodingContractData = any;
 
@@ -35,7 +34,15 @@ type ScriptArg = string | number | boolean;
 /** @public */
 type FilenameOrPID = number | string;
 
-/** @public */
+/**
+ * @typedef Person
+ * @property {Number} id
+ * @property {String} message
+ * @property {Number} duration
+ * @property {Number} state
+ * @property {HTMLElement} element
+ * @property {Number?} timeout
+ */
 interface Person {
   hp: HP;
   skills: Skills;
