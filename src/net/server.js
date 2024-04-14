@@ -71,6 +71,47 @@ class PC {
 }
 
 /**
+ * Main function to execute the hacking script.
+ * @async
+ * @param {NS} ns - The namespace object.
+ */
+export async function main(ns) {
+  let huhu = new PC();
+  ns.tprintf("Test");
+  ns.tprintf(huhu.toString());
+  let homepc = new PC(ns.getServer("home"));
+  let pcs = [homepc];
+  pcs.forEach((pc) => {
+    const hostScan = ns.scan(pc.name);
+    log(ns, hostScan, true);
+  });
+}
+/**
+ * Initiates a deep network scan to discover new computers and adds them to the array of discovered computers.
+ * @param {Object} ns - The namespace object.
+ * @returns {Array.<PC>} - Returns an array of discovered computers.
+ */
+
+export function deepScan(ns) {
+  let PCAR = [new PC(ns.getServer("home"))];
+  for (let i = 0; i < PCAR.length; i++) {
+    const hostScan = ns.scan(PCAR[i].name);
+    hostScan.forEach((host) => {
+      if (!PCAR.some((pc) => pc.name === host)) {
+        ns.killall(host);
+        let IO = new PC(ns.getServer(host));
+        ns.tprint(`${IO.name}:${IO.orgName} @ ${IO.ip}`);
+        if (IO.ramMax <= 0 && IO.cash <= 0) {
+          ns.toast(`Dead PC: ${IO.name}`, "info", 9999);
+        }
+        PCAR.push(IO);
+      }
+    });
+  }
+  return PCAR;
+}
+
+/**
  * Executes a protocol on a specified computer.
  * @async
  * @param {NS} ns - The namespace object.
@@ -137,63 +178,39 @@ function getTarget(ns, PCAR) {
   }
 }
 
-/**
- * Main function to execute the hacking script.
- * @async
- * @param {NS} ns - The namespace object.
- */
-export async function main(ns) {
-  printBreak(ns, "Spooling up data center...");
-  /** @param {Array.<PC>} PCAR - The array of available computers. */
-  let PCAR = deepScan(ns);
-  while (true) {
-    const timer = new Promise((resolve) => setTimeout(resolve, 60000));
-    PCAR = PCAR.map((oldPC) => updatePC(ns, oldPC));
-    let target = getTarget(ns, PCAR);
-    const lockedPCs = PCAR.filter((locked) => locked.type === "locked");
-    for (let PC of lockedPCs) {
-      const result = autoHack(ns, PC);
-      if (result) {
-        PC = updatePC(ns, PC);
-        ns.toast(`Acquired ${PC.name} (${PC.type})`, "info", 360000);
-      }
-    }
-    for (let PC of PCAR) {
-      if (PC.idle && PC.protocol) {
-        if (PC.type === "node" && PC.protocol === "pending") {
-          Object.assign(PC, target);
-        }
-        require("lib/helpers").printBreak(ns, `${PC.orgName} (${PC.type})`);
-        await runProtocol(ns, PC);
-      }
-    }
-    await timer;
-  }
-}
-
-/**
- * Initiates a deep network scan to discover new computers and adds them to the array of discovered computers.
- * @param {Object} ns - The namespace object.
- * @returns {Array.<PC>} - Returns an array of discovered computers.
- */
-export function deepScan(ns) {
-  let PCAR = [new PC(ns.getServer("home"))];
-  for (let i = 0; i < PCAR.length; i++) {
-    const hostScan = ns.scan(PCAR[i].name);
-    hostScan.forEach((host) => {
-      if (!PCAR.some((pc) => pc.name === host)) {
-        ns.killall(host);
-        let IO = new PC(ns.getServer(host));
-        ns.tprint(`${IO.name}:${IO.orgName} @ ${IO.ip}`);
-        if (IO.ramMax <= 0 && IO.cash <= 0) {
-          ns.toast(`Dead PC: ${IO.name}`, "info", 9999);
-        }
-        PCAR.push(IO);
-      }
-    });
-  }
-  return PCAR;
-}
+// /**
+//  * Main function to execute the hacking script.
+//  * @async
+//  * @param {NS} ns - The namespace object.
+//  */
+// export async function main(ns) {
+//   printBreak(ns, "Spooling up data center...");
+//   /** @param {Array.<PC>} PCAR - The array of available computers. */
+//   let PCAR = deepScan(ns);
+//   while (true) {
+//     const timer = new Promise((resolve) => setTimeout(resolve, 60000));
+//     PCAR = PCAR.map((oldPC) => updatePC(ns, oldPC));
+//     let target = getTarget(ns, PCAR);
+//     const lockedPCs = PCAR.filter((locked) => locked.type === "locked");
+//     for (let PC of lockedPCs) {
+//       const result = autoHack(ns, PC);
+//       if (result) {
+//         PC = updatePC(ns, PC);
+//         ns.toast(`Acquired ${PC.name} (${PC.type})`, "info", 360000);
+//       }
+//     }
+//     for (let PC of PCAR) {
+//       if (PC.idle && PC.protocol) {
+//         if (PC.type === "node" && PC.protocol === "pending") {
+//           Object.assign(PC, target);
+//         }
+//         printBreak(ns, `${PC.orgName} (${PC.type})`);
+//         await runProtocol(ns, PC);
+//       }
+//     }
+//     await timer;
+//   }
+// }
 
 /**
  * Checks if a computer has a backdoor available and notifies the user if it does.
