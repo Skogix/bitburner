@@ -1,25 +1,36 @@
-import { log, pathJoin } from "lib/helpers.js";
-import { PC } from "server.js";
+import { log, pathJoin } from "/lib/helpers.js";
+import { PC } from "/net/server.js";
 
-const ManagerType = {
+/**
+ * @typedef {Object} huhu
+ * @property {number} secGoal - The optimal security level.
+ * @property {number} cash - The available funds.
+ * @property {number} cashGoal - The target funds.
+ * @property {number} growth - The server growth rate.
+ * @property {number} ramUsed - The consumed RAM.
+ * @property {number} ramMax - The maximum RAM.
+ * @property {number} cores - The CPU cores count.
+ * @property {number} hackSkill - The required hacking skill.
+ * @property {string} protocol - The target protocol.
+ * @property {string} target - The host name of the target.
+ * @property {number} threads - The thread capability.
+ * @property {string} type - How the host is handled.
+ * @property {string} goal - The end goal for the protocol.
+ * @property {boolean} idle - Indicates if it's running scripts.
+ */
+
+export const ManagerType = {
   Server: "ServerManager",
-  Autumn: "autumn",
-  Winter: "winter",
-  Spring: "spring",
+  None: "",
 };
 
-class ServerManager {
-  /**
-   * Creates an instance of PC.
-   * @param {ManagerType} [ManagerType - Type of manager={}] - The properties of the PC.
-   * @param {string} [this.hostname="Unknown"] - The host's permanent name.
-   * @param {Array.<string>} [this.log[]] - A personal logfile
-   * @param {String} [this.ip="10.0.0.1"] - The IP address.
-   * @param {boolean} [this.hasAdminRights=false] - The admin rights status.
-   * @param {boolean} [server.backdoorInstalled=false] - The backdoor installation status.
-   * @param {ServerManager} [server.instance - The backdoor installation status.
-   */
+/**
+ * @type {class} ServerManager
+ * @param {ServerManager} instance - the instance
+ */
+export class ServerManager {
   getNS() {
+    let huhu = new PC();
     return this.ns;
   }
   getInstance(ns) {
@@ -29,19 +40,26 @@ class ServerManager {
     return this.servers;
   }
   getServer(ns) {
-    return this.servers.find((s) => s.username == ns.argsr[0]);
+    return this.servers.find((s) => s.username == ns.args[0]);
   }
   getPC(ns) {
     return this.servers.find((s) => s.username == ns.args[0]);
   }
   async getInstance(ns) {
     if (ns.args[0] == "init") {
-      return new ServerManager();
+      return new ServerManager(ns);
     } else {
       return this.instance;
     }
   }
+
+  /**
+   * creates a ServerManager
+   * @type {class} ServerManager
+   * @param {ServerManager} instance - the instance
+   */
   constructor(ns, init = {}) {
+    log(ns, "starting ServerManager constructor...");
     this.type = ManagerType.Server;
     this.hostname = init.hostname || "Unknown";
     this.ns = ns;
@@ -49,6 +67,8 @@ class ServerManager {
     this.ip = init.ip || "10.0.0.1";
     this.PCs = [];
     this.instance = null;
+    this.servers = [];
+    this.#initServers(ns);
   }
   /**
    * Executes a protocol on a specified computer.
@@ -56,7 +76,7 @@ class ServerManager {
    * @param {NS} ns - The namespace object.
    * @param {PC} PC - The computer on which the protocol will be executed.
    */
-  async #runProtocol(ns, PC) {
+  async #_runProtocol(ns, PC) {
     let protocol = ns.args[0];
     let target = ns.args[1];
     let source = ns.args[2];
@@ -85,6 +105,7 @@ class ServerManager {
    * Initiates a deep network scan to discover new computers and adds them to the array of discovered computers.
    * @param {Function} initServers - test
    * @param {Object} ns - The namespace object.
+   * @param {PC} PC - The target computer.
    * @returns {Array.<PC>} - Returns an array of discovered computers.
    */
   async #initServers(ns) {
@@ -94,7 +115,10 @@ class ServerManager {
     /** @type {Array.<PS>} notScanned*/
     var notScanned = [];
     log(ns, scanned, true);
-    let homepc = new PC(ns.getServer("home"));
+    let homeserver = ns.getServer("home");
+    log(ns, "homeserver" + homeserver);
+    let homepc = PC.createPCfromServer(homeserver);
+    log(ns, "homepc" + homepc);
     notScanned.push(homepc);
     while (notScanned.length > 0) {
       log(ns, 138);
@@ -118,7 +142,7 @@ class ServerManager {
           if (server.ramMax <= 0 && server.cash <= 0) {
             ns.toast(`Dead PC: ${server.name}`, "info", 9999);
           }
-          let newCreatedPC = PC.createPCfromServer(server);
+          let newCreatedPC = PC.createPCfromServer(ns, server);
           log(ns, `${server.name}: ${server.orgName} @${server.ip}`, true);
           notScanned.push(newCreatedPC);
         }
@@ -129,14 +153,15 @@ class ServerManager {
   }
   //static protocol = this.protocol
   async runProtocol(ns) {
-    this.runProtocol(ns.args[0], ns.args[1], ns.args[2]);
+    this.#_runProtocol(ns.args[0], ns.args[1], ns.args[2]);
   }
   _init(ns) {
-    this.#uldateServers(ns.args[0], ns.args[1], ns.args[2]);
+    this.#_uldateServers(ns.args[0], ns.args[1], ns.args[2]);
   }
+
   /** @returns {ServerManager} instance */
   /** @param {ServerManager} instance */
-  #uldateServers(ns) {
+  #_uldateServers(ns) {
     this.servers = ns.argrs[0];
   }
 }
@@ -149,9 +174,11 @@ class ServerManager {
  *
  */
 export async function main(ns) {
+  ns.tprint("running /net/serverManager.js");
   let init = ns.args[0];
   if (init) {
-    ServerManager.instance = new ServerManager();
+    ServerManager.instance = new ServerManager(ns);
+    ns.tprint("/net/serverManager.js initiated.");
   } else {
     return ServerManager.instance;
   }

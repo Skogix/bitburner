@@ -6,13 +6,15 @@
  * @param {string} [toastStyle=""] - The style of the toast notification (e.g., "info", "warning").
  * @returns {string} - The logged message.
  */
-export function log(
+export async function log(
   ns,
   message = "",
   alsoPrintToTerminal = true,
   toastStyle = "",
 ) {
-  ns.print(message);
+  //let message = ns.args[0]
+  //let alsoPrintToTerminal = true
+  //let toastStyle = "info"//ns.args[2]//ns.enums.ToastVariant.INFO
   if (toastStyle) ns.toast(message, toastStyle);
   if (alsoPrintToTerminal) {
     ns.tprint(message);
@@ -608,33 +610,6 @@ export async function autoRetry(
       retryDelayMs *= backoffRate;
     }
   }
-}
-
-/** Helper to log a message, and optionally also tprint it and toast it
- * @param {NS} ns - The nestcript instance passed to your script's main entry point */
-export function log(
-  ns,
-  message = "",
-  alsoPrintToTerminal = false,
-  toastStyle = "",
-  maxToastLength = Number.MAX_SAFE_INTEGER,
-) {
-  checkNsInstance(ns, '"log"');
-  ns.print(message);
-  if (toastStyle)
-    ns.toast(
-      message.length <= maxToastLength
-        ? message
-        : message.substring(0, maxToastLength - 3) + "...",
-      toastStyle,
-    );
-  if (alsoPrintToTerminal) {
-    ns.tprint(message);
-    // TODO: Find a way write things logged to the terminal to a "permanent" terminal log file, preferably without this becoming an async function.
-    //       Perhaps we copy logs to a port so that a separate script can optionally pop and append them to a file.
-    //ns.write("log.terminal.txt", message + '\n', 'a'); // Note: we should get away with not awaiting this promise since it's not a script file
-  }
-  return message;
 }
 
 /** Helper to get a list of all hostnames on the network

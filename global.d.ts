@@ -1,4 +1,5 @@
-import NetscriptDefinitions from './NetscriptDefinitions';
+import NetscriptDefinitions from "./NetscriptDefinitions";
+import Skogix from "./SkogixDefinitions";
 
 declare global {
   function sprintf(fmt: string, ...args): string;

@@ -4,77 +4,229 @@
 
 import { log, pathJoin } from "lib/helpers.js";
 
-class PC {
+/**
+ * Represents a PC (Personal Computer) object.
+ * @class
+ */
+export class PC {
+  /**
+   * The host's permanent name.
+   * @type {string}
+   */
+  name;
+
+  /**
+   * The associated organization.
+   * @type {string}
+   */
+  orgName;
+
+  /**
+   * The ownership status.
+   * @type {boolean}
+   */
+  owned;
+
+  /**
+   * The IP address.
+   * @type {string}
+   */
+  ip;
+
+  /**
+   * The admin rights status.
+   * @type {boolean}
+   */
+  admin;
+
+  /**
+   * The backdoor installation status.
+   * @type {boolean}
+   */
+  backdoor;
+
+  /**
+   * The connection status.
+   * @type {boolean}
+   */
+  connected;
+
+  /**
+   * The ports information.
+   * @type {Object}
+   * @property {number} nukePorts - The required ports for NUKE.
+   * @property {number} openPorts - The count of open ports.
+   * @property {boolean} SSH - The SSH port status.
+   * @property {boolean} FTP - The FTP port status.
+   * @property {boolean} SMTP - The SMTP port status.
+   * @property {boolean} HTTP - The HTTP port status.
+   * @property {boolean} SQL - The SQL port status.
+   */
+  ports;
+
+  /**
+   * The current security level.
+   * @type {number}
+   */
+  sec;
+
+  /**
+   * The optimal security level.
+   * @type {number}
+   */
+  secGoal;
+
+  /**
+   * The available funds.
+   * @type {number}
+   */
+  cash;
+
+  /**
+   * The target funds.
+   * @type {number}
+   */
+  cashGoal;
+
+  /**
+   * The server growth rate.
+   * @type {number}
+   */
+  growth;
+
+  /**
+   * The consumed RAM.
+   * @type {number}
+   */
+  ramUsed;
+
+  /**
+   * The maximum RAM.
+   * @type {number}
+   */
+  ramMax;
+
+  /**
+   * The CPU cores count.
+   * @type {number}
+   */
+  cores;
+
+  /**
+   * The required hacking skill.
+   * @type {number}
+   */
+  hackSkill;
+
+  /**
+   * The target protocol.
+   * @type {string}
+   */
+  protocol;
+
+  /**
+   * The host name of the target.
+   * @type {string}
+   */
+  target;
+
+  /**
+   * The thread capability.
+   * @type {number}
+   */
+  threads;
+
+  /**
+   * How the host is handled.
+   * @type {string}
+   */
+  type;
+
+  /**
+   * The end goal for the protocol.
+   * @type {string}
+   */
+  goal;
+
+  /**
+   * Indicates if it's running scripts.
+   * @type {boolean}
+   */
+  idle;
+
   /**
    * Creates an instance of PC.
+   * @constructor
    * @param {Object} [server={}] - The properties of the PC.
    * @param {string} [server.hostname="Unknown"] - The host's permanent name.
-   * @param {string} [server.organizationName="Mystery"] - The associated organization.
-   * @param {boolean} [server.purchasedByPlayer=false] - The ownership status.
    * @param {string} [server.ip="10.0.0.1"] - The IP address.
-   * @param {boolean} [server.hasAdminRights=false] - The admin rights status.
-   * @param {boolean} [server.backdoorInstalled=false] - The backdoor installation status.
-   * @param {boolean} [server.isConnectedTo=false] - The connection status.
-   * @param {Object} server.ports - The ports information.
-   * @param {number} [server.numOpenPortsRequired=0] - The required ports for NUKE.
-   * @param {number} [server.openPortCount=0] - The count of open ports.
-   * @param {boolean} [server.sshPortOpen=false] - The SSH port status.
-   * @param {boolean} [server.ftpPortOpen=false] - The FTP port status.
-   * @param {boolean} [server.smtpPortOpen=false] - The SMTP port status.
-   * @param {boolean} [server.httpPortOpen=false] - The HTTP port status.
-   * @param {boolean} [server.sqlPortOpen=false] - The SQL port status.
-   * @param {number} [server.hackDifficulty=1] - The current security level.
-   * @param {number} [server.minDifficulty=1] - The optimal security level.
-   * @param {number} [server.moneyAvailable=0] - The available funds.
-   * @param {number} [server.moneyMax=0] - The target funds.
-   * @param {number} [server.serverGrowth=0] - The server growth rate.
-   * @param {number} [server.ramUsed=0] - The consumed RAM.
-   * @param {number} [server.maxRam=0] - The maximum RAM.
-   * @param {number} [server.cpuCores=0] - The CPU cores count.
-   * @param {number} [server.requiredHackingSkill=0] - The required hacking skill.
-   * @param {string} server.protocol - The target protocol.
-   * @param {string} server.target - The host name of the target.
-   * @param {number} server.threads - The thread capability.
-   * @param {string} server.type - How the host is handled.
-   * @param {string} server.goal - The end goal for the protocol.
-   * @param {boolean} server.idle - Indicates if it's running scripts.
+   * @param {boolean} [server.sshPortOpen=false] - Whether or not the SSH Port is open.
+   * @param {boolean} [server.ftpPortOpen=false] - Whether or not the FTP port is open.
+   * @param {boolean} [server.smtpPortOpen=false] - Whether or not the SMTP Port is open.
+   * @param {boolean} [server.httpPortOpen=false] - Whether or not the HTTP Port is open.
+   * @param {boolean} [server.sqlPortOpen=false] - Whether or not the SQL Port is open.
+   * @param {boolean} [server.hasAdminRights=false] - Flag indicating whether player has admin/root access to this server.
+   * @param {number} [server.cpuCores=0] - How many CPU cores this server has.
+   * @param {boolean} [server.isConnectedTo=false] - Flag indicating whether player is currently connected to this server.
+   * @param {number} [server.ramUsed=0] - RAM (GB) used. i.e. unavailable RAM.
+   * @param {number} [server.maxRam=0] - RAM (GB) available on this server.
+   * @param {string} [server.organizationName=""] - Name of company/faction/etc. that this server belongs to.
+   * @param {boolean} [server.purchasedByPlayer=false] - Flag indicating whether this is a purchased server.
+   * @param {boolean} [server.backdoorInstalled=false] - Flag indicating whether this server has a backdoor installed by a player.
+   * @param {number} [server.baseDifficulty=1] - Server's initial server security level at creation.
+   * @param {number} [server.hackDifficulty=1] - Server Security Level.
+   * @param {number} [server.minDifficulty=1] - Minimum server security level that this server can be weakened to.
+   * @param {number} [server.moneyAvailable=0] - How much money currently resides on the server and can be hacked.
+   * @param {number} [server.moneyMax=0] - Maximum amount of money that this server can hold.
+   * @param {number} [server.numOpenPortsRequired=0] - Number of open ports required in order to gain admin/root access.
+   * @param {number} [server.openPortCount=0] - How many ports are currently opened on the server.
+   * @param {number} [server.requiredHackingSkill=0] - Hacking level required to hack this server.
+   * @param {number} [server.serverGrowth=0] - Growth effectiveness statistic.
+   * @param {string} [server.protocol=""] - The target protocol.
+   * @param {string} [server.target=""] - The host name of the target.
+   * @param {number} [server.threads=1] - The thread capability.
+   * @param {string} [server.type=""] - Server type.
+   * @param {string} [server.goal=""] - Server goal.
+   * @param {boolean} [server.idle=true] - Whether the server is idle.
    */
+
   constructor(server = {}) {
-    this.name = server.hostname || "Unknown";
-    this.orgName = server.organizationName || "Mystery";
-    this.owned = server.purchasedByPlayer || false;
+    this.hostname = server.hostname || "Unknown";
     this.ip = server.ip || "10.0.0.1";
+    this.sshPortOpen = server.sshPortOpen || false;
+    this.ftpPortOpen = server.ftpPortOpen || false;
+    this.smtpPortOpen = server.smtpPortOpen || false;
+    this.httpPortOpen = server.httpPortOpen || false;
+    this.sqlPortOpen = server.sqlPortOpen || false;
     this.admin = server.hasAdminRights || false;
-    this.backdoor = server.backdoorInstalled || false;
+    this.cores = server.cpuCores || 0;
     this.connected = server.isConnectedTo || false;
-    this.ports = {
-      nukePorts: server.numOpenPortsRequired || 0,
-      openPorts: server.openPortCount || 0,
-      SSH: server.sshPortOpen || false,
-      FTP: server.ftpPortOpen || false,
-      SMTP: server.smtpPortOpen || false,
-      HTTP: server.httpPortOpen || false,
-      SQL: server.sqlPortOpen || false,
-    };
+    this.ramUsed = server.ramUsed || 0;
+    this.maxRam = server.maxRam || 0;
+    this.orgName = server.organizationName || "";
+    this.owned = server.purchasedByPlayer || false;
+    this.backdoor = server.backdoorInstalled || false;
+    this.baseDifficulty = server.baseDifficulty || 1;
     this.sec = server.hackDifficulty || 1;
     this.secGoal = server.minDifficulty || 1;
     this.cash = server.moneyAvailable || 0;
     this.cashGoal = server.moneyMax || 0;
-    this.growth = server.serverGrowth || 0;
-    this.ramUsed = server.ramUsed || 0;
-    this.ramMax = server.maxRam || 0;
-    this.cores = server.cpuCores || 0;
+    this.nukePorts = server.numOpenPortsRequired || 0;
+    this.openPorts = server.openPortCount || 0;
     this.hackSkill = server.requiredHackingSkill || 0;
-    this.protocol = server.protocol;
-    this.target = server.target;
-    this.threads = server.threads;
-    this.type = server.type;
-    this.goal = server.goal;
-    this.idle = server.idle;
+    this.growth = server.serverGrowth || 0;
+    this.protocol = server.protocol || "";
+    this.target = server.target || "";
+    this.threads = server.threads || 1;
+    this.type = server.type || "";
+    this.goal = server.goal || "";
+    this.idle = server.idle || true;
   }
 
   /** @param {NS} ns - The namespace object. */
   print(ns) {
+    /** @type {Server} huhu */
+    let huhu = ns.getServer("home");
     let hackingDiff = this.hackSkill - ns.getHackingLevel();
     let hackable = hackingDiff > 0 ? hackingDiff : "Hackable!";
     log(
@@ -116,7 +268,9 @@ class PC {
    *  @param {Server} server - The server to be converted
    *  @returns {PC} pc - The newly born pc
    */
-  static createPCfromServer(ns, server) {
+  static createPCfromServer(ns) {
+    log(ns, "running createPCfromServer");
+    let server = ns.args[0];
     let pc = new PC(server);
     server.pc.name = "Skogix";
     pc.hostname = server.hostname || "Unknown";
@@ -154,97 +308,52 @@ class PC {
   }
 }
 
-/**
- * Executes a protocol on a specified computer.
- * @async
- * @param {NS} ns - The namespace object.
- * @param {PC} PC - The computer on which the protocol will be executed.
- */
-export async function runProtocol(ns, PC) {
-  // export function pathJoin(...args) {
-  //   return args
-  //     .filter((s) => !!s)
-  //     .join("/")
-  //     .replace(/\/\/+/g, "/");
-  // }
-  const filePath = pathJoin(PC.protocol, "Protocol.js");
-  ns.scp(`${filePath}`, PC.name);
-  log(ns, filePath, true);
-  ns.tprint(
-    `Targeting ${PC.target} with ${file} on ${PC.name} using ${PC.threads} threads.`,
-  );
-  ns.exec(filePath, PC.name, PC.threads, PC.target, PC.goal);
-}
-
-/**
- * Automatically executes hacking protocols on a computer.
- * @async
- * @param {NS} ns - The namespace object.
- * @param {PC} PC - The target computer.
- * @returns {boolean} - Returns true if the hacking attempt is successful, otherwise false.
- */
-async function autoHack(ns) {
-  // if (!PC.admin) {
-  //   try {
-  //     if (PC.ports.nukePorts >= 1) ns.brutessh(PC.name);
-  //     if (PC.ports.nukePorts >= 2) ns.ftpcrack(PC.name);
-  //     if (PC.ports.nukePorts >= 3) ns.relaysmtp(PC.name);
-  //     if (PC.ports.nukePorts >= 4) ns.httpworm(PC.name);
-  //     if (PC.ports.nukePorts >= 5) ns.sqlinject(PC.name);
-  //     ns.nuke(PC.name);
-  //   } catch (error) {
-  //     return false;
-  //   }
-  // }
-  // return true;
-}
-
-/**
- * Initiates a deep network scan to discover new computers and adds them to the array of discovered computers.
- * @param {Function} initServers - test
- * @param {Object} ns - The namespace object.
- * @returns {Array.<PC>} - Returns an array of discovered computers.
- */
-export function initServers(ns) {
-  log(ns, "START", true);
-  /** @type {Array.<PS>} scanned*/
-  var scanned = [];
-  /** @type {Array.<PS>} notScanned*/
-  var notScanned = [];
-  log(ns, scanned, true);
-  let homepc = new PC(ns.getServer("home"));
-  notScanned.push(homepc);
-  while (notScanned.length > 0) {
-    log(ns, 138);
-    let currentPC = notScanned.pop();
-    let scannedHostnames = ns.scan(currentPC.hostname);
-
-    scannedHostnames.forEach((hostname) => {
-      log(ns, "scannedhostname: " + hostname, true);
-      if (
-        scanned.includes((s) => s.hostname == hostname) ||
-        hostname == undefined
-      ) {
-        // already scanned
-        log(ns, "den finns inte", true);
-      } else {
-        log(ns, 151);
-        // /** @param {Server} server */
-        log(ns, "den finns", true);
-        // log(ns, server.ip, true);
-        let server = ns.getServer(hostname);
-        if (server.ramMax <= 0 && server.cash <= 0) {
-          ns.toast(`Dead PC: ${server.name}`, "info", 9999);
-        }
-        let newCreatedPC = PC.createPCfromServer(server);
-        log(ns, `${server.name}: ${server.orgName} @${server.ip}`, true);
-        notScanned.push(newCreatedPC);
-      }
-    });
-  }
-  log(ns, "main done", true);
-}
-
+// /**
+//  * Initiates a deep network scan to discover new computers and adds them to the array of discovered computers.
+//  * @param {Function} initServers - test
+//  * @param {Object} ns - The namespace object.
+//  * @returns {Array.<PC>} - Returns an array of discovered computers.
+//  */
+// export function initServers(ns) {
+//   log(ns, "START", true);
+//   /** @type {Array.<PS>} scanned*/
+//   var scanned = [];
+//   /** @type {Array.<PS>} notScanned*/
+//   var notScanned = [];
+//   log(ns, scanned, true);
+//   let homepc = new PC(ns.getServer("home"));
+//   log(ns, homepc, true);
+//   notScanned.push(homepc);
+//   while (notScanned.length > 0) {
+//     let currentPC = notScanned.pop();
+//     let scannedHostnames = ns.scan(currentPC.hostname);
+//     log(ns, scannedHostnames, true);
+//     scannedHostnames.forEach((hostname) => {
+//       log(ns, "scannedhostname: " + hostname, true);
+//       if (
+//         scanned.includes((s) => s.hostname == hostname) ||
+//         hostname == undefined
+//       ) {
+//         // already scanned
+//         log(ns, "den finns inte", true);
+//       } else {
+//         log(ns, 151);
+//         // /** @param {Server} server */
+//         log(ns, "den finns", true);
+//         // log(ns, server.ip, true);
+//         let server = ns.getServer(hostname);
+//         if (server.ramMax <= 0 && server.cash <= 0) {
+//           ns.toast(`Dead PC: ${server.name}`, "info", 9999);
+//         }
+//         let newCreatedPC = PC.createPCfromServer(server);
+//         log(ns, `${server.name}: ${server.orgName} @${server.ip}`, true);
+//         notScanned.push(newCreatedPC);
+//       }
+//     });
+//   }
+//   log(ns, "main done", true);
+// }
+//
 /**
  * Main function to execute the hacking script.
  * @async
